@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_tv_program/utils/theme_utils.dart';
 
 import 'home_page.dart';
 
@@ -12,10 +13,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Mon programme TV',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: MaterialColor(0xff343a40, ThemeUtils.color),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: HomePage(title: 'Flutter Demo Home Page'),
+      home: HomePage(title: 'Mon programme TV'),
     );
   }
 }
