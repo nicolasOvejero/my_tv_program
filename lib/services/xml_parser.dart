@@ -46,22 +46,23 @@ class XmlParser {
       p.previouslyShown = programme.getElement('previously-shown') != null;
 
       final String start = programme.getAttribute('start');
+
       p.start = new DateTime(
           int.parse(start.substring(0, 4)),
-          int.parse(start.substring(5, 6)),
-          int.parse(start.substring(7, 8)),
-          int.parse(start.substring(9, 10)),
-          int.parse(start.substring(11, 12)),
-          int.parse(start.substring(13, 14)));
+          int.parse(start.substring(4, 6)),
+          int.parse(start.substring(6, 8)),
+          int.parse(start.substring(8, 10)),
+          int.parse(start.substring(10, 12)),
+          int.parse(start.substring(12, 14)));
 
       final String stop = programme.getAttribute('stop');
       p.stop = new DateTime(
           int.parse(stop.substring(0, 4)),
-          int.parse(stop.substring(5, 6)),
-          int.parse(stop.substring(7, 8)),
-          int.parse(stop.substring(9, 10)),
-          int.parse(stop.substring(11, 12)),
-          int.parse(stop.substring(13, 14)));
+          int.parse(stop.substring(4, 6)),
+          int.parse(stop.substring(6, 8)),
+          int.parse(stop.substring(8, 10)),
+          int.parse(stop.substring(10, 12)),
+          int.parse(stop.substring(12, 14)));
 
       final String channel = programme.getAttribute('channel');
       channels.firstWhere((c) => c.id == channel).programmes.add(p);

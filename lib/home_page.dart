@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_tv_program/services/service.dart';
+import 'package:flutter/painting.dart';
 import 'package:my_tv_program/services/xml_parser.dart';
 import 'package:my_tv_program/utils/channel_utils.dart';
 import 'package:my_tv_program/utils/theme_utils.dart';
@@ -16,21 +16,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePage extends State<HomePage> {
-  List<ChannelModel> channels = List<ChannelModel>();
-
-  Future<void> _fillChannelsAndProgrammes() async {
-    final String xml = await Service.getXmlValuesFormServer();
-    XmlParser().xmlStringToModel(xml);
-    setState(() {
-      channels = ChannelUtils.sortChannelForFrenchOrder(XmlParser().channels);
-    });
-  }
+  final List<ChannelModel> channels =
+      ChannelUtils.sortChannelForFrenchOrder(XmlParser().channels);
 
   @override
   void initState() {
     super.initState();
 
-    _fillChannelsAndProgrammes();
+    channels.forEach((element) {
+      element.currentProgramme = element.programmes.firstWhere((programme) {
+        return programme.start.isBefore(DateTime.now()) &&
+            programme.stop.isAfter(DateTime.now());
+      });
+    });
   }
 
   @override
@@ -47,29 +45,76 @@ class _HomePage extends State<HomePage> {
                 child: Card(
                     color: ThemeUtils.color[700],
                     child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          Flexible(
-                            flex: 1,
-                            child: Image.network(channels[index].icon,
-                                height: 40, width: 40),
-                          ),
-                          Flexible(
-                              flex: 3,
-                              child: Padding(
-                                  padding: EdgeInsets.only(left: 16.0),
-                                  child: Text(channels[index].name,
-                                      style: TextStyle(color: ThemeUtils.color[50])
-                                  )
-                              )
-                          )
-                        ],
-                      ),
-                    )
-                )
-            )
-        )
-    );
+                        padding: EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 8.0),
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    flex: 1,
+                                    child: Image.network(channels[index].icon,
+                                        height: 40),
+                                  ),
+                                  Flexible(
+                                    flex: 3,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(left: 6.0),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(channels[index].name,
+                                              style: TextStyle(
+                                                  color: ThemeUtils.color[400],
+                                                  fontSize: 18.0)),
+                                          Text(
+                                              channels[index]
+                                                  ?.currentProgramme
+                                                  ?.title,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: ThemeUtils.color[600],
+                                                  fontSize: 16.0)),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Flexible(
+                                  flex: 1,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: Image.network(
+                                        channels[index]?.currentProgramme?.icon,
+                                        height: 60),
+                                  ),
+                                ),
+                                Flexible(
+                                    flex: 3,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(left: 8.0),
+                                      child: Text(
+                                          channels[index]
+                                              ?.currentProgramme
+                                              ?.desc,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 3,
+                                          style: TextStyle(
+                                              color: ThemeUtils.color[500])),
+                                    ))
+                              ],
+                            )
+                            // Text(channels[index]?.currentProgramme?.title),
+                          ],
+                        ))))));
   }
 }
