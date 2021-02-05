@@ -41,9 +41,19 @@ class XmlParser {
       p.title = utf8.decode(programme.getElement('title')?.text?.runes?.toList() ?? []);
       p.desc = utf8.decode(programme.getElement('desc')?.text?.runes?.toList() ?? []);
       p.category = utf8.decode(programme.getElement('category')?.text?.runes?.toList() ?? []);
-      p.length = int.parse(programme.getElement('length')?.text);
       p.icon = programme.getElement('icon')?.getAttribute('src');
       p.previouslyShown = programme.getElement('previously-shown') != null;
+
+      if (programme.getElement('length') != null) {
+        final unit = programme.getElement('length').getAttribute('units');
+        switch (unit) {
+          case 'hours':
+            p.length = int.parse(programme.getElement('length')?.text) * 60;
+            break;
+          case 'minutes':
+            p.length = int.parse(programme.getElement('length')?.text);
+        }
+      }
 
       final String start = programme.getAttribute('start');
 

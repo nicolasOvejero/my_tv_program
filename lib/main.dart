@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: MaterialColor(0xff343a40, ThemeUtils.color),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: HomePage(title: 'Mon programme TV'),
+      home: HomePage(),
     );
   }
 }
