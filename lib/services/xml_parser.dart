@@ -39,6 +39,7 @@ class XmlParser {
       final ProgrammeModel p = new ProgrammeModel();
 
       p.title = utf8.decode(programme.getElement('title')?.text?.runes?.toList() ?? []);
+      p.subTitle = utf8.decode(programme.getElement('sub-title')?.text?.runes?.toList() ?? []);
       p.desc = utf8.decode(programme.getElement('desc')?.text?.runes?.toList() ?? []);
       p.category = utf8.decode(programme.getElement('category')?.text?.runes?.toList() ?? []);
       p.icon = programme.getElement('icon')?.getAttribute('src');
