@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:my_tv_program/models/channel_model.dart';
+import 'package:my_tv_program/models/programme_model.dart';
 import 'package:my_tv_program/services/xml_parser.dart';
 import 'package:my_tv_program/utils/theme_utils.dart';
 
@@ -14,6 +16,7 @@ class DetailsPage extends StatefulWidget {
 
 class _DetailsPage extends State<DetailsPage> {
   ChannelModel _channel;
+  int _index;
 
   Widget _formatLength(int lengthMin) {
     final duration = Duration(minutes: lengthMin ?? 0);
@@ -42,6 +45,10 @@ class _DetailsPage extends State<DetailsPage> {
     super.initState();
 
     _channel = XmlParser().channels.firstWhere((e) => e.id == widget.channelId);
+    if (_channel != null) {
+      _index = _channel.programmes.indexWhere((element) =>
+          element.start == _channel.currentProgramme.start && element.stop == _channel.currentProgramme.stop);
+    }
   }
 
   @override
@@ -97,9 +104,76 @@ class _DetailsPage extends State<DetailsPage> {
                         style: TextStyle(color: ThemeUtils.color[600], fontSize: 15)),
                   ],
                 ),
+                if (_channel.programmes.length > _index + 1)
+                  Divider(color: Color(0xff212529), height: 40, thickness: 2, indent: 75, endIndent: 75),
+                if (_channel.programmes.length > _index + 1)
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 8.0),
+                    child: Text('Après ce programme',
+                        style: TextStyle(color: ThemeUtils.color[200], fontSize: 24, fontWeight: FontWeight.bold)),
+                  ),
+                if (_channel.programmes.length > _index + 1) _nextProgrammes(_channel?.programmes[_index + 1]),
+                if (_channel.programmes.length > _index + 2)
+                  Divider(color: Color(0xff212529), height: 20, thickness: 1),
+                if (_channel.programmes.length > _index + 2) _nextProgrammes(_channel?.programmes[_index + 2]),
               ]),
-            )
+            ),
           ]),
         ));
+  }
+
+  Widget _nextProgrammes(ProgrammeModel programme) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Padding(
+        padding: EdgeInsets.only(bottom: 8.0),
+        child: Text(programme?.title ?? '-',
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontWeight: FontWeight.bold, color: ThemeUtils.color[600], fontSize: 16.0)),
+      ),
+      Padding(
+        padding: EdgeInsets.only(bottom: 8.0),
+        child: Row(
+          children: [
+            Flexible(
+              flex: 1,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: programme?.icon != null
+                    ? Image.network(programme?.icon, height: 60)
+                    : Image.asset('assets/default_image.jpg', height: 60),
+              ),
+            ),
+            Flexible(
+                flex: 3,
+                fit: FlexFit.tight,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 8.0),
+                  child: Text(programme?.desc ?? '',
+                      overflow: TextOverflow.ellipsis, maxLines: 3, style: TextStyle(color: ThemeUtils.color[500])),
+                ))
+          ],
+        ),
+      ),
+      Row(
+        children: [
+          RichText(
+            text: TextSpan(
+              text: 'Début : ',
+              style: TextStyle(color: ThemeUtils.color[200], fontSize: 12),
+              children: <TextSpan>[
+                TextSpan(text: programme?.start != null ?
+                  DateFormat('HH:mm').format(programme?.start) :
+                  '-'
+                ),
+              ],
+            ),
+          ),
+          Text(' | ', style: TextStyle(color: ThemeUtils.color[50], fontSize: 13)),
+          _formatLength(programme?.length),
+          Text(' | ', style: TextStyle(color: ThemeUtils.color[50], fontSize: 13)),
+          Text(programme?.category ?? '', style: TextStyle(color: ThemeUtils.color[600], fontSize: 12))
+        ],
+      )
+    ]);
   }
 }

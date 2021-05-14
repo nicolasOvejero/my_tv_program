@@ -117,7 +117,10 @@ class _HomePage extends State<HomePage> {
                                 text: 'Début : ',
                                 style: TextStyle(color: ThemeUtils.color[200], fontSize: 12),
                                 children: <TextSpan>[
-                                  TextSpan(text: DateFormat('HH:mm').format(channels[index]?.currentProgramme?.start)),
+                                  TextSpan(text: channels[index]?.currentProgramme?.start != null ?
+                                    DateFormat('HH:mm').format(channels[index]?.currentProgramme?.start) :
+                                    '-'
+                                  ),
                                 ],
                               ),
                             ),
@@ -139,7 +142,7 @@ class _HomePage extends State<HomePage> {
     final duration = Duration(minutes: lengthMin ?? 0);
     String twoDigits(int n) => n >= 10 ? "$n" : "0$n";
 
-    if (lengthMin < 60) {
+    if (lengthMin != null && lengthMin < 60) {
       return Text(
         '${twoDigits((duration.inMinutes.remainder(60))).toString()} min',
         style: TextStyle(color: ThemeUtils.color[400], fontSize: 12),
