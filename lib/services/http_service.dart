@@ -21,7 +21,8 @@ class HttpService {
     }
 
     final Map<String, String> headers = {"Accept": "text/html,application/xml"};
-    final response = await http.get('https://xmltv.ch/xmltv/xmltv-tnt.xml', headers: headers);
+    print(Uri.https('xmltv.ch', 'xmltv/xmltv-tnt.xml'));
+    final response = await http.get(Uri.https('xmltv.ch', 'xmltv/xmltv-tnt.xml'), headers: headers);
 
     if (response.statusCode == 200) {
       file.writeAsString(response.body);
