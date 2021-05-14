@@ -11,6 +11,10 @@ class ChannelModel {
   String icon;
   List<ProgrammeModel> programmes;
   ProgrammeModel currentProgramme;
+  ProgrammeModel nightProgramme;
+
+  ProgrammeModel programToShow;
+
 
   ChannelModel(String id, String name, String icon) {
     this.id = id;

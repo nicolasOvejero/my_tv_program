@@ -5,6 +5,7 @@ import 'package:my_tv_program/details_page.dart';
 import 'package:my_tv_program/services/xml_parser.dart';
 import 'package:my_tv_program/utils/channel_utils.dart';
 import 'package:my_tv_program/utils/theme_utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models/channel_model.dart';
 
@@ -17,25 +18,33 @@ class HomePage extends StatefulWidget {
 
 class _HomePage extends State<HomePage> {
   final List<ChannelModel> channels = ChannelUtils.sortChannelForFrenchOrder(XmlParser().channels);
+  bool isNightMode = false;
 
   @override
   void initState() {
     super.initState();
 
-    channels.forEach((element) {
-      if (element.programmes != null && element.programmes.isNotEmpty) {
-        element.currentProgramme = element.programmes.firstWhere((programme) {
-          return programme.start.isBefore(DateTime.now()) && programme.stop.isAfter(DateTime.now());
-        }, orElse: () => null);
-      }
-    });
+    _getShownType();
+    _setCurrentAndNightPrograms();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('En ce moment'),
+          title: Text(isNightMode ? 'Ce soir' : 'En ce moment'),
+          actions: [
+            IconButton(
+              icon: isNightMode ? Icon(Icons.timelapse_outlined) : Icon(Icons.nightlight_round),
+              onPressed: () {
+                setState(() {
+                  isNightMode = !isNightMode;
+                  _toggleShownProgram();
+                  _setShownType();
+                });
+              },
+            ),
+          ],
         ),
         backgroundColor: ThemeUtils.color[700],
         body: ListView.separated(
@@ -72,7 +81,7 @@ class _HomePage extends State<HomePage> {
                                       children: [
                                         Text(channels[index].name,
                                             style: TextStyle(color: ThemeUtils.color[400], fontSize: 18.0)),
-                                        Text(channels[index]?.currentProgramme?.title ?? '-',
+                                        Text(channels[index]?.programToShow?.title ?? '-',
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold,
@@ -92,8 +101,8 @@ class _HomePage extends State<HomePage> {
                                 flex: 1,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8.0),
-                                  child: channels[index]?.currentProgramme?.icon != null
-                                      ? Image.network(channels[index]?.currentProgramme?.icon, height: 60)
+                                  child: channels[index]?.programToShow?.icon != null
+                                      ? Image.network(channels[index]?.programToShow?.icon, height: 60)
                                       : Image.asset('assets/default_image.jpg', height: 60),
                                 ),
                               ),
@@ -102,7 +111,7 @@ class _HomePage extends State<HomePage> {
                                   fit: FlexFit.tight,
                                   child: Padding(
                                     padding: EdgeInsets.only(left: 8.0),
-                                    child: Text(channels[index]?.currentProgramme?.desc ?? '',
+                                    child: Text(channels[index]?.programToShow?.desc ?? '',
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 3,
                                         style: TextStyle(color: ThemeUtils.color[500])),
@@ -117,18 +126,18 @@ class _HomePage extends State<HomePage> {
                                 text: 'Début : ',
                                 style: TextStyle(color: ThemeUtils.color[200], fontSize: 12),
                                 children: <TextSpan>[
-                                  TextSpan(text: channels[index]?.currentProgramme?.start != null ?
-                                    DateFormat('HH:mm').format(channels[index]?.currentProgramme?.start) :
+                                  TextSpan(text: channels[index]?.programToShow?.start != null ?
+                                    DateFormat('HH:mm').format(channels[index]?.programToShow?.start) :
                                     '-'
                                   ),
                                 ],
                               ),
                             ),
                             Text(' | ', style: TextStyle(color: ThemeUtils.color[50], fontSize: 13)),
-                            _formatLength(channels[index]?.currentProgramme?.length),
+                            _formatLength(channels[index]?.programToShow?.length),
                             Text(' | ', style: TextStyle(color: ThemeUtils.color[50], fontSize: 13)),
                             Text(
-                              channels[index]?.currentProgramme?.category ?? '',
+                              channels[index]?.programToShow?.category ?? '',
                               style: TextStyle(color: ThemeUtils.color[600], fontSize: 12),
                             )
                           ],
@@ -136,6 +145,48 @@ class _HomePage extends State<HomePage> {
                         // Text(channels[index]?.currentProgramme?.title),
                       ],
                     )))));
+  }
+
+  void _getShownType() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isNightMode = prefs.getBool('isNightMode') ?? false;
+      _toggleShownProgram();
+    });
+  }
+
+  void _setShownType() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isNightMode', isNightMode);
+  }
+
+  void _toggleShownProgram() {
+    if (isNightMode) {
+      channels.forEach((element) {
+        element.programToShow = element.nightProgramme;
+      });
+    } else {
+      channels.forEach((element) {
+        element.programToShow = element.currentProgramme;
+      });
+    }
+  }
+
+  void _setCurrentAndNightPrograms() {
+    DateTime now = DateTime.now();
+    DateTime nightDate = new DateTime(now.year, now.month, now.day, 20, 50, now.second, now.millisecond, now.microsecond);
+
+    channels.forEach((element) {
+      if (element.programmes != null && element.programmes.isNotEmpty) {
+        element.currentProgramme = element.programmes.firstWhere((programme) {
+          return programme.start.isBefore(DateTime.now()) && programme.stop.isAfter(DateTime.now());
+        }, orElse: () => null);
+        element.nightProgramme = element.programmes.firstWhere((programme) {
+          return programme.start.isAfter(nightDate) && programme.length > 20;
+        }, orElse: () => null);
+        element.programToShow = element.currentProgramme;
+      }
+    });
   }
 
   Widget _formatLength(int lengthMin) {
