@@ -47,7 +47,7 @@ class _DetailsPage extends State<DetailsPage> {
     _channel = XmlParser().channels.firstWhere((e) => e.id == widget.channelId);
     if (_channel != null) {
       _index = _channel.programmes.indexWhere((element) =>
-          element.start == _channel.currentProgramme.start && element.stop == _channel.currentProgramme.stop);
+          element.start == _channel.programToShow.start && element.stop == _channel.programToShow.stop);
     }
   }
 
@@ -61,8 +61,8 @@ class _DetailsPage extends State<DetailsPage> {
         body: SingleChildScrollView(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             FittedBox(
-              child: _channel?.currentProgramme?.icon != null
-                  ? Image.network(_channel.currentProgramme.icon)
+              child: _channel?.programToShow?.icon != null
+                  ? Image.network(_channel.programToShow.icon)
                   : Image.asset('assets/default_image.jpg'),
               fit: BoxFit.fill,
             ),
@@ -77,30 +77,30 @@ class _DetailsPage extends State<DetailsPage> {
                 ]),
                 Padding(
                     padding: EdgeInsets.only(bottom: 8.0),
-                    child: Text(_channel.currentProgramme.title,
+                    child: Text(_channel.programToShow.title,
                         style: TextStyle(color: ThemeUtils.color[200], fontSize: 24, fontWeight: FontWeight.bold))),
                 Visibility(
-                  visible: _channel?.currentProgramme?.subTitle?.isNotEmpty,
+                  visible: _channel?.programToShow?.subTitle?.isNotEmpty,
                   child: Padding(
                       padding: EdgeInsets.only(bottom: 8.0),
-                      child: Text(_channel.currentProgramme.subTitle,
+                      child: Text(_channel.programToShow.subTitle,
                           style: TextStyle(color: ThemeUtils.color[400], fontSize: 16))),
                 ),
                 Visibility(
-                  visible: _channel?.currentProgramme?.desc?.isNotEmpty,
+                  visible: _channel?.programToShow?.desc?.isNotEmpty,
                   child: Padding(
                       padding: EdgeInsets.only(bottom: 8.0),
-                      child: Text(_channel.currentProgramme.desc,
+                      child: Text(_channel.programToShow.desc,
                           style: TextStyle(color: ThemeUtils.color[500], fontSize: 15))),
                 ),
                 Row(
                   children: [
-                    Text(_channel.currentProgramme.previouslyShown ? 'Rediffusion' : 'Inedit',
+                    Text(_channel.programToShow.previouslyShown ? 'Rediffusion' : 'Inedit',
                         style: TextStyle(color: ThemeUtils.color[600], fontSize: 15)),
                     Text(' | ', style: TextStyle(color: ThemeUtils.color[600], fontSize: 17)),
-                    _formatLength(_channel.currentProgramme.length),
+                    _formatLength(_channel.programToShow.length),
                     Text(' | ', style: TextStyle(color: ThemeUtils.color[600], fontSize: 17)),
-                    Text(_channel.currentProgramme.category,
+                    Text(_channel.programToShow.category,
                         style: TextStyle(color: ThemeUtils.color[600], fontSize: 15)),
                   ],
                 ),

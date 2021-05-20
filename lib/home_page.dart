@@ -52,7 +52,7 @@ class _HomePage extends State<HomePage> {
             itemCount: channels.length,
             itemBuilder: (context, index) => GestureDetector(
                 onTap: () {
-                  if (channels[index].currentProgramme != null) {
+                  if (channels[index].programToShow != null) {
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) => DetailsPage(channelId: channels[index].id)),
                     );
